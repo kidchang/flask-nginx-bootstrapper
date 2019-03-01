@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+    mongo:
+        image: mvertes/alpine-mongo
+        ports:
+            - 27017:27017
+    flask:
+        image: compassindocker/flask
+        build:
+            context: flask
+        volumes:
+            - ./app:/usr/src/app
+        environment:
+            MONGO_HOST: mongo
+            config: prd
+        depends_on:
+            - mongo
+    nginx:
+        image: nginx:1.13-alpine
+        volumes:
+            - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+            - ./app:/usr/share/nginx/html:ro
+        depends_on:
+            - flask
+        ports:
+            - 80:80
+        restart: on-failure
